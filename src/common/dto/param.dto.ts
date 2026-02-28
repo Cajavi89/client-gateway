@@ -1,9 +1,14 @@
-import { Type } from 'class-transformer'
-import { IsNumber, IsPositive } from 'class-validator'
+import { Type } from 'class-transformer';
+import { IsNumber, IsPositive, IsUUID } from 'class-validator';
 
 export class ParamDto {
   @IsPositive()
   @IsNumber()
   @Type(() => Number)
-  id: number
+  id: number;
+}
+
+export class ParamIdDto {
+  @IsUUID()
+  id: string;
 }
