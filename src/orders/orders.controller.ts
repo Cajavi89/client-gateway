@@ -10,7 +10,7 @@ import {
   Patch,
 } from '@nestjs/common';
 import { CreateOrderDto } from './dto/create-order.dto';
-import { ORDER_SERVICE } from 'src/config/services';
+import { NATS_SERVICE } from 'src/config/services';
 import { ClientProxy, RpcException } from '@nestjs/microservices';
 import { firstValueFrom } from 'rxjs';
 import { OrderStatus } from './dto/enum/order.enum';
@@ -19,18 +19,16 @@ import { StatusDto } from './dto/status.dto';
 
 @Controller('orders')
 export class OrdersController {
-  constructor(
-    @Inject(ORDER_SERVICE) private readonly ordersClient: ClientProxy,
-  ) {}
+  constructor(@Inject(NATS_SERVICE) private readonly natsClient: ClientProxy) {}
 
   @Post()
   create(@Body() createOrderDto: CreateOrderDto) {
-    return this.ordersClient.send('createOrder', createOrderDto);
+    return this.natsClient.send('createOrder', createOrderDto);
   }
 
   @Get()
   findAll(@Query() orderPaginationDto: OrderPaginationDto) {
-    return this.ordersClient.send('findAllOrders', orderPaginationDto);
+    return this.natsClient.send('findAllOrders', orderPaginationDto);
   }
 
   @Get(':id')
@@ -45,7 +43,7 @@ export class OrdersController {
         paidAt: Date | null;
         createdAt: Date;
         updatedAt: Date;
-      }>(this.ordersClient.send('findOneOrder', { id }));
+      }>(this.natsClient.send('findOneOrder', { id }));
       return order;
     } catch (e) {
       throw new RpcException(e);
@@ -58,7 +56,7 @@ export class OrdersController {
     @Body() statusDto: StatusDto,
   ) {
     try {
-      return this.ordersClient.send('changeOrderStatus', {
+      return this.natsClient.send('changeOrderStatus', {
         id,
         status: statusDto.status,
       });
